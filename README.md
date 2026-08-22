@@ -144,17 +144,9 @@ The $\theta$ variables are used as effective radiating temperatures in this mini
 
 With $\left[x\right]_{+}=\max(x,0)$, the evaporative mass-flux closures are
 
-$$
-E_{L}
-=
-\frac{\rho_{a}}{r_{LS}}m
-\left[q_{s}^{*}(T_{s})-q_{L}\right]_{+},
-\qquad
-E_{o}
-=
-\frac{\rho_{a}}{r_{LO}}
-\left[q_{s}^{*}(T_{o})-q_{o}\right]_{+}.
-$$
+```math
+E_L = \frac{\rho_a}{r_{LS}}\,m\left[q_s^{\ast}(T_s)-q_L\right]_+,\qquad E_o = \frac{\rho_a}{r_{LO}}\left[q_s^{\ast}(T_o)-q_o\right]_+.
+```
 
 and the sensible heat fluxes are
 
@@ -166,16 +158,9 @@ $$
 
 The subscripts $LS$ and $SS$ denote land latent and sensible resistances; $LO$ and $SO$ denote their ocean counterparts. During integration, saturation specific humidity is linearized about a reference state:
 
-$$
-q_{s}^{*}(T)
-\simeq
-q_{\mathrm{ref}}^{*}+\gamma_{q}(T-T_{\mathrm{ref}}),
-\qquad
-\gamma_{q}
-\simeq
-\frac{q_{\mathrm{ref}}^{*}L_{v}}
-{R_{v}T_{\mathrm{ref}}^{2}}.
-$$
+```math
+q_s^{\ast}(T) \simeq q_{\mathrm{ref}}^{\ast}+\gamma_q(T-T_{\mathrm{ref}}),\qquad \gamma_q \simeq \frac{q_{\mathrm{ref}}^{\ast}L_v}{R_vT_{\mathrm{ref}}^2}.
+```
 
 ### Seasonal forcing and stochastic precipitation
 
