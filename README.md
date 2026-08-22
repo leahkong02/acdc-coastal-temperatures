@@ -7,9 +7,9 @@ This repository develops minimal stochastic box models for land--ocean controls 
 ## Development status
 
 - `original_soil_model.py` is the legacy land-only baseline. It predicts land surface temperature plus surface- and root-zone soil moisture, while atmospheric temperature and humidity are prescribed forcings.
-- The six-state land--ocean system documented below is the updated model specification. An executable implementation of this system has not yet been added to this branch.
+- `land_ocean_box_model.py` is the executable implementation of the updated six-state land--ocean specification documented below.
 
-This distinction is important: the schematic and equations describe the intended coupled model, not results produced by the current baseline script.
+The current land--ocean experiment is a numerical model baseline. Its output has not yet been validated against observations and should not be interpreted as proof of a coastal-temperature mechanism.
 
 ## Updated land--ocean model
 
@@ -136,13 +136,43 @@ $$
 
 so the mean event depth is $8\ \mathrm{mm}$.
 
+## Reference numerical experiment
+
+The committed reference experiment integrates 60 years with an hourly timestep, removes the first 10 years as spin-up, fixes $T_o=300\ \mathrm{K}$, and uses random seed 42. For JJA after spin-up, the run gives
+
+- mean land surface temperature: $301.936\ \mathrm{K}$;
+- standard deviation: $2.378\ \mathrm{K}$;
+- skewness: $0.509$.
+
+These values and figures are deterministic outputs of the current code and parameter set, not observational validation.
+
+### JJA land-temperature distribution
+
+![JJA land-temperature probability density](figures/land_ocean_jja_temperature_distribution.png)
+
+### Soil moisture--temperature relationship
+
+![JJA soil moisture and land-temperature relationship](figures/land_ocean_jja_soil_moisture_temperature.png)
+
+### Last five simulated years
+
+![Land surface, land atmosphere, and ocean atmosphere temperatures](figures/land_ocean_last_five_year_temperature_timeseries.png)
+
 ## Repository contents
 
 - `original_soil_model.py`: legacy land-only numerical model.
+- `land_ocean_box_model.py`: updated executable six-state land--ocean model and result-figure generator.
 - `make_land_ocean_box_schematic.py`: Python source for the model schematic.
-- `figures/land_ocean_box_model_schematic.png`: README-ready raster figure.
-- `figures/land_ocean_box_model_schematic.svg`: editable vector figure.
-- `figures/land_ocean_box_model_schematic.pdf`: publication-ready vector figure.
+- `figures/land_ocean_box_model_schematic.{png,svg,pdf}`: model schematic.
+- `figures/land_ocean_jja_temperature_distribution.{png,svg,pdf}`: JJA land-temperature distribution.
+- `figures/land_ocean_jja_soil_moisture_temperature.{png,svg,pdf}`: JJA soil moisture--temperature relationship.
+- `figures/land_ocean_last_five_year_temperature_timeseries.{png,svg,pdf}`: final five-year temperature evolution.
+
+Run the numerical experiment and regenerate its three figures with:
+
+```bash
+python3 land_ocean_box_model.py
+```
 
 Regenerate the schematic with:
 
@@ -150,4 +180,4 @@ Regenerate the schematic with:
 python3 make_land_ocean_box_schematic.py
 ```
 
-This command requires Python 3 and Matplotlib.
+The scripts require Python 3, NumPy, and Matplotlib.
