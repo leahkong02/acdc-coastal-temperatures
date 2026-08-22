@@ -2,14 +2,12 @@
 
 This repository develops minimal stochastic box models for land--ocean controls on coastal air temperature. The current model specification couples land surface temperature and soil moisture to land and ocean atmospheric heat and moisture reservoirs.
 
-The current Climatekid implementation, scripts, and figures are maintained in [`climatekid/`](climatekid/).
-
-![Minimal land--ocean box-model schematic](climatekid/figures/land_ocean_box_model_schematic.png)
+![Minimal land--ocean box-model schematic](figures/land_ocean_box_model_schematic.png)
 
 ## Development status
 
-- `climatekid/original_soil_model.py` is the legacy land-only baseline. It predicts land surface temperature plus surface- and root-zone soil moisture, while atmospheric temperature and humidity are prescribed forcings.
-- `climatekid/land_ocean_box_model.py` is the executable implementation of the updated six-state land--ocean specification documented below.
+- `original_soil_model.py` is the legacy land-only baseline. It predicts land surface temperature plus surface- and root-zone soil moisture, while atmospheric temperature and humidity are prescribed forcings.
+- `land_ocean_box_model.py` is the executable implementation of the updated six-state land--ocean specification documented below.
 
 The current land--ocean experiment is a numerical model baseline. Its output has not yet been validated against observations and should not be interpreted as proof of a coastal-temperature mechanism.
 
@@ -201,37 +199,35 @@ These values and figures are deterministic outputs of the current code and param
 
 ### JJA land-temperature distribution
 
-![JJA land-temperature probability density](climatekid/figures/land_ocean_jja_temperature_distribution.png)
+![JJA land-temperature probability density](figures/land_ocean_jja_temperature_distribution.png)
 
 ### Soil moisture--temperature relationship
 
-![JJA soil moisture and land-temperature relationship](climatekid/figures/land_ocean_jja_soil_moisture_temperature.png)
+![JJA soil moisture and land-temperature relationship](figures/land_ocean_jja_soil_moisture_temperature.png)
 
 ### Last five simulated years
 
-![Land surface, land atmosphere, and ocean atmosphere temperatures](climatekid/figures/land_ocean_last_five_year_temperature_timeseries.png)
+![Land surface, land atmosphere, and ocean atmosphere temperatures](figures/land_ocean_last_five_year_temperature_timeseries.png)
 
 ## Repository contents
 
-- `climatekid/original_soil_model.py`: legacy land-only numerical model.
-- `climatekid/land_ocean_box_model.py`: updated executable six-state land--ocean model and result-figure generator.
-- `climatekid/make_land_ocean_box_schematic.py`: Python source for the model schematic.
-- `climatekid/figures/land_ocean_box_model_schematic.{png,svg,pdf}`: model schematic.
-- `climatekid/figures/land_ocean_jja_temperature_distribution.{png,svg,pdf}`: JJA land-temperature distribution.
-- `climatekid/figures/land_ocean_jja_soil_moisture_temperature.{png,svg,pdf}`: JJA soil moisture--temperature relationship.
-- `climatekid/figures/land_ocean_last_five_year_temperature_timeseries.{png,svg,pdf}`: final five-year temperature evolution.
+- `original_soil_model.py`: legacy land-only numerical model.
+- `land_ocean_box_model.py`: updated executable six-state land--ocean model and result-figure generator.
+- `make_land_ocean_box_schematic.py`: Python source for the model schematic.
+- `figures/land_ocean_box_model_schematic.{png,svg,pdf}`: model schematic.
+- `figures/land_ocean_jja_temperature_distribution.{png,svg,pdf}`: JJA land-temperature distribution.
+- `figures/land_ocean_jja_soil_moisture_temperature.{png,svg,pdf}`: JJA soil moisture--temperature relationship.
+- `figures/land_ocean_last_five_year_temperature_timeseries.{png,svg,pdf}`: final five-year temperature evolution.
 
 Run the numerical experiment and regenerate its three figures with:
 
 ```bash
-cd climatekid
 python3 land_ocean_box_model.py
 ```
 
 Regenerate the schematic with:
 
 ```bash
-cd climatekid
 python3 make_land_ocean_box_schematic.py
 ```
 
