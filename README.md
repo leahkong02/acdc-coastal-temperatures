@@ -35,10 +35,17 @@ The land surface energy budget is
 
 $$
 C_L\frac{dT_s}{dt}
-=F(t)-\sigma T_s^4+\epsilon_a\sigma\theta_L^4-L_vE_L-H_L,
+=F(t)-\epsilon_s\sigma T_s^4
++\epsilon_s\epsilon_A\sigma\theta_L^4-L_vE_L-H_L,
 $$
 
-and normalized soil moisture evolves as
+where the land heat capacity varies with normalized soil moisture:
+
+$$
+C_L=h_s\left(c_{p,s}\rho_s+c_{p,l}\rho_l\phi m\right).
+$$
+
+Normalized soil moisture evolves as
 
 $$
 \frac{dm}{dt}=\frac{P-E_L}{W_{\max}},
@@ -57,6 +64,7 @@ $$
 \frac{d\theta_L}{dt}
 =\frac{\theta_o-\theta_L}{\tau_{\rm mix}}
 +\frac{H_L}{C_A}
++\frac{R_L}{C_A}
 +W_{eL}(\theta_{FT}-\theta_L),
 $$
 
@@ -73,6 +81,7 @@ $$
 \frac{d\theta_o}{dt}
 =\frac{\theta_L-\theta_o}{\tau_{\rm mix}}
 +\frac{H_o}{C_A}
++\frac{R_o}{C_A}
 +W_{eo}(\theta_{FT}-\theta_o),
 $$
 
@@ -83,7 +92,53 @@ $$
 +W_{eo}(q_{FT}-q_o).
 $$
 
-The atmospheric heat and mass capacities are $C_A=\rho_a c_p h_A$ and $M_A=\rho_a h_A$. The exchange timescale $\tau_{\rm mix}$ couples the two atmospheric boxes. The coefficients $W_{eL}$ and $W_{eo}$ represent entrainment from a prescribed free troposphere $(\theta_{FT},q_{FT})$.
+The atmospheric heat and mass capacities are $C_A=\rho_a c_p h_A$ and $M_A=\rho_a h_A$. The exchange timescale $\tau_{\rm mix}$ couples the two atmospheric boxes. The coefficients $W_{eL}$ and $W_{eo}$ represent entrainment from a prescribed free troposphere $(\theta_{FT},q_{FT})$. The terms $R_L$ and $R_o$ are the net longwave heating rates of the land and ocean atmospheric boxes.
+
+### Longwave radiation closure
+
+The current experiment uses surface, atmospheric-box, and free-tropospheric effective emissivities
+
+$$
+\epsilon_s=0.98,
+\qquad
+\epsilon_A=0.75,
+\qquad
+\epsilon_{FT}=0.70.
+$$
+
+Upward longwave emission from the land and prescribed ocean surfaces is
+
+$$
+OLR_L=\epsilon_s\sigma T_s^4,
+\qquad
+OLR_o=\epsilon_s\sigma T_o^4,
+$$
+
+and the land surface absorbs downward emission from the land atmospheric box according to
+
+$$
+DLR_L=\epsilon_s\epsilon_A\sigma\theta_L^4.
+$$
+
+The prescribed free-tropospheric downward longwave forcing is
+
+$$
+R_{ad}=\epsilon_{FT}\sigma\theta_{FT}^4.
+$$
+
+The net longwave heating of each atmospheric box includes absorption of free-tropospheric and surface radiation and two-sided atmospheric emission:
+
+$$
+R_L=\epsilon_A(R_{ad}+OLR_L)
+-2\epsilon_A\sigma\theta_L^4,
+$$
+
+$$
+R_o=\epsilon_A(R_{ad}+OLR_o)
+-2\epsilon_A\sigma\theta_o^4.
+$$
+
+The $\theta$ variables are used as effective radiating temperatures in this minimal closure. The implemented parameterization does not include a separate transmitted free-tropospheric longwave term in the land surface budget.
 
 ### Surface flux closure
 
@@ -138,11 +193,11 @@ so the mean event depth is $8\ \mathrm{mm}$.
 
 ## Reference numerical experiment
 
-The committed reference experiment integrates 60 years with an hourly timestep, removes the first 10 years as spin-up, fixes $T_o=300\ \mathrm{K}$, and uses random seed 42. For JJA after spin-up, the run gives
+The committed reference experiment integrates 300 years with an hourly timestep, removes the first 10 years as spin-up, fixes $T_o=288\ \mathrm{K}$, and uses random seed 42. For JJA after spin-up, the run gives
 
-- mean land surface temperature: $301.936\ \mathrm{K}$;
-- standard deviation: $2.378\ \mathrm{K}$;
-- skewness: $0.509$.
+- mean land surface temperature: $300.716\ \mathrm{K}$;
+- standard deviation: $3.355\ \mathrm{K}$;
+- skewness: $0.368$.
 
 These values and figures are deterministic outputs of the current code and parameter set, not observational validation.
 

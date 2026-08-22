@@ -35,7 +35,7 @@ steps_per_day = 24
 
 dt = day / steps_per_day
 
-nyears = 60
+nyears = 300
 
 spinup_years = 10
 
@@ -53,13 +53,23 @@ rho_a = 1.25
 
 rho_l = 1000.0
 
+rho_s = 1000.0
+
 cp = 1003.0
+
+cp_s = 1000.0
+
+cp_l = 4182.0
 
 Lv = 2.257e6
 
 sigma = 5.67e-8
 
-eps_atm = 0.67
+eps_s = 0.98
+
+eps_A = 0.75
+
+eps_FT = 0.70
 
 p_s = 1000.0
 
@@ -75,7 +85,7 @@ C_A = rho_a * cp * h_BL
 
 M_A = rho_a * h_BL
 
-C_L = 2.0e5
+# C_L is calculated each timestep from current soil moisture.
 
 soil_depth = 0.1
 
@@ -117,7 +127,7 @@ We_o = 1.0 / tau_ent_o
 # FIXED OCEAN SST
 # ============================================================
 
-To = 300.0 #293.0
+To = 288.0
 
 dTo_dt = 0.0
 
@@ -260,9 +270,17 @@ for i in range(nt - 1):
     # LAND LONGWAVE RADIATION
     # --------------------------------------------------------
 
-    OLR_L = sigma * Ts[i]**4
+    OLR_L = eps_s * sigma * Ts[i]**4
 
-    DLR_L = eps_atm * sigma * theta_L[i]**4
+    DLR_L = eps_s * eps_A * sigma * theta_L[i]**4
+
+    R_ad = eps_FT * sigma * theta_FT[i]**4
+
+    R_L = eps_A * (R_ad + OLR_L) - 2.0 * eps_A * sigma * theta_L[i]**4
+
+    OLR_o = eps_s * sigma * To**4
+
+    R_o = eps_A * (R_ad + OLR_o) - 2.0 * eps_A * sigma * theta_o[i]**4
 
     # --------------------------------------------------------
     # STOCHASTIC PRECIPITATION
@@ -293,6 +311,10 @@ for i in range(nt - 1):
     # SW - OLR + DLR - L_v E_L - H_L
     # --------------------------------------------------------
 
+    C_L = soil_depth * (
+        cp_s * rho_s + cp_l * rho_l * porosity * m[i]
+    )
+
     dTs_dt = (F[i] - OLR_L + DLR_L - Lv * E_L - H_L) / C_L
 
     # --------------------------------------------------------
@@ -314,6 +336,8 @@ for i in range(nt - 1):
     dtheta_L_dt = (theta_o[i] - theta_L[i]) / tau_mix
 
     dtheta_L_dt += H_L / C_A
+
+    dtheta_L_dt += R_L / C_A
 
     dtheta_L_dt += We_L * (theta_FT[i] - theta_L[i])
 
@@ -342,6 +366,8 @@ for i in range(nt - 1):
     dtheta_o_dt = (theta_L[i] - theta_o[i]) / tau_mix
 
     dtheta_o_dt += H_o / C_A
+
+    dtheta_o_dt += R_o / C_A
 
     dtheta_o_dt += We_o * (theta_FT[i] - theta_o[i])
 
