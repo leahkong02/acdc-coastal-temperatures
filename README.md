@@ -216,10 +216,10 @@ These values and figures are deterministic outputs of the current code and param
 - `climatekid/original_soil_model.py`: legacy land-only numerical model.
 - `climatekid/land_ocean_box_model.py`: updated executable six-state land--ocean model and result-figure generator.
 - `climatekid/make_land_ocean_box_schematic.py`: Python source for the model schematic.
-- `climatekid/figures/land_ocean_box_model_schematic.{png,svg,pdf}`: model schematic.
-- `climatekid/figures/land_ocean_jja_temperature_distribution.{png,svg,pdf}`: JJA land-temperature distribution.
-- `climatekid/figures/land_ocean_jja_soil_moisture_temperature.{png,svg,pdf}`: JJA soil moisture--temperature relationship.
-- `climatekid/figures/land_ocean_last_five_year_temperature_timeseries.{png,svg,pdf}`: final five-year temperature evolution.
+- `climatekid/figures/land_ocean_box_model_schematic.png`: model schematic.
+- `climatekid/figures/land_ocean_jja_temperature_distribution.png`: JJA land-temperature distribution.
+- `climatekid/figures/land_ocean_jja_soil_moisture_temperature.png`: JJA soil moisture--temperature relationship.
+- `climatekid/figures/land_ocean_last_five_year_temperature_timeseries.png`: final five-year temperature evolution.
 
 Run the numerical experiment and regenerate its three figures with:
 
