@@ -1,5 +1,10 @@
 # ACDC Coastal Temperatures
 
+## Project links
+
+- [Shared Google Drive folder](https://drive.google.com/drive/folders/16f1sFb1bPPwaMmKPY4DJ5QeR5aFLqNeF?usp=sharing)
+- [Editable Overleaf manuscript](https://www.overleaf.com/9982126531gkfzgctpmhdv#af9c42)
+
 This repository develops minimal stochastic box models for land--ocean controls on coastal air temperature. The current model specification couples land surface temperature and soil moisture to land and ocean atmospheric heat and moisture reservoirs.
 
 ![Minimal land--ocean box-model schematic](figures/land_ocean_box_model_schematic.png)

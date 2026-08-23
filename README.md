@@ -1,8 +1,13 @@
 # ACDC Coastal Temperatures
 
+## Project links
+
+- [Shared Google Drive folder](https://drive.google.com/drive/folders/16f1sFb1bPPwaMmKPY4DJ5QeR5aFLqNeF?usp=sharing)
+- [Editable Overleaf manuscript](https://www.overleaf.com/9982126531gkfzgctpmhdv#af9c42)
+
 This repository develops minimal stochastic box models for land--ocean controls on coastal air temperature. The current model specification couples land surface temperature and soil moisture to land and ocean atmospheric heat and moisture reservoirs.
 
-The current Climatekid implementation, scripts, and figures are maintained in [`climatekid/`](climatekid/).
+The current model implementation, scripts, and figures are organized in [`climatekid/`](climatekid/).
 
 ![Minimal land--ocean box-model schematic](climatekid/figures/land_ocean_box_model_schematic.png)
 
@@ -15,7 +20,7 @@ The current land--ocean experiment is a numerical model baseline. Its output has
 
 ## Observed Northern Hemisphere temperature skewness
 
-To document the observed target pattern, we use NOAA CPC Global Unified daily maximum temperature on a 0.5° grid north of 20°N for 1985--2014.
+The observational target is documented using NOAA CPC Global Unified daily maximum temperature on a 0.5° grid north of 20°N for 1985--2014.
 
 <p align="center">
   <img src="climatekid/figures/cpc_northern_hemisphere_jja_tmax_anomaly_skewness_1985_2014.png" alt="Northern Hemisphere JJA daily-maximum temperature anomaly skewness" width="50%">
