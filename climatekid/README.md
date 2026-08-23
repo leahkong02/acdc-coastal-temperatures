@@ -15,7 +15,9 @@ The current land--ocean experiment is a numerical model baseline. Its output has
 
 To document the observed target pattern, we use NOAA CPC Global Unified daily maximum temperature on a 0.5° grid north of 20°N for 1985--2014.
 
-![Northern Hemisphere JJA daily-maximum temperature anomaly skewness](figures/cpc_northern_hemisphere_jja_tmax_anomaly_skewness_1985_2014.png)
+<p align="center">
+  <img src="figures/cpc_northern_hemisphere_jja_tmax_anomaly_skewness_1985_2014.png" alt="Northern Hemisphere JJA daily-maximum temperature anomaly skewness" width="50%">
+</p>
 
 At each grid cell, the daily climatology is smoothed with a centered 31-day running mean and removed from JJA daily maximum temperature. Skewness is then calculated from all valid JJA anomalies as
 
