@@ -1,2 +1,4 @@
 figures/*.pdf
 figures/*.svg
+data/cpc_northern_hemisphere_skewness/
+data/natural_earth_110m_countries.geojson

@@ -11,6 +11,20 @@ This repository develops minimal stochastic box models for land--ocean controls 
 
 The current land--ocean experiment is a numerical model baseline. Its output has not yet been validated against observations and should not be interpreted as proof of a coastal-temperature mechanism.
 
+## Observed Northern Hemisphere temperature skewness
+
+To document the observed target pattern, we use NOAA CPC Global Unified daily maximum temperature on a 0.5° grid north of 20°N for 1985--2014.
+
+![Northern Hemisphere JJA daily-maximum temperature anomaly skewness](figures/cpc_northern_hemisphere_jja_tmax_anomaly_skewness_1985_2014.png)
+
+At each grid cell, the daily climatology is smoothed with a centered 31-day running mean and removed from JJA daily maximum temperature. Skewness is then calculated from all valid JJA anomalies as
+
+```math
+\gamma_1 = \frac{\left\langle (T^{\prime}-\overline{T^{\prime}})^3 \right\rangle}{\left\langle (T^{\prime}-\overline{T^{\prime}})^2 \right\rangle^{3/2}}.
+```
+
+Grid cells with fewer than 80% of the expected JJA days are masked. Positive values indicate a heavier warm-anomaly tail, whereas negative values indicate a heavier cold-anomaly tail.
+
 ## Updated land--ocean model
 
 ### State vector and prescribed boundary conditions
@@ -214,6 +228,8 @@ These values and figures are deterministic outputs of the current code and param
 - `original_soil_model.py`: legacy land-only numerical model.
 - `land_ocean_box_model.py`: updated executable six-state land--ocean model and result-figure generator.
 - `make_land_ocean_box_schematic.py`: Python source for the model schematic.
+- `cpc_northern_hemisphere_summer_skewness.py`: CPC download, anomaly, skewness, and polar-map workflow.
+- `figures/cpc_northern_hemisphere_jja_tmax_anomaly_skewness_1985_2014.png`: observed Northern Hemisphere JJA anomaly-skewness map.
 - `figures/land_ocean_box_model_schematic.png`: model schematic.
 - `figures/land_ocean_jja_temperature_distribution.png`: JJA land-temperature distribution.
 - `figures/land_ocean_jja_soil_moisture_temperature.png`: JJA soil moisture--temperature relationship.
