@@ -133,7 +133,7 @@ def the_model(F,To,q_R):
 	c_pl  = 1000			# heat capacity of dry soil [J/kg/K]
 	c_po  =  4182			# heat capacity of water [J/kg/K]
 	c_pa = 1003
-	L = 2257000			# Latent enthalpy of vaporization [J/kg]
+	L = 2257000				# Latent enthalpy of vaporization [J/kg]
 	mu_s = rho_l*h_s
 
 ################# State Variables
@@ -151,7 +151,7 @@ def the_model(F,To,q_R):
 	LHF_l = np.zeros(N)
 	P = np.zeros(N)
 
-	Ts[0] = To[0]			# Initial condition for surface temperature
+	Ts[0] = 298			# Initial condition for surface temperature
 	m_s[0] = 0.01			# ""			surface moisture
 	th_l[0] = 298
 	th_o[0] = 298
@@ -206,8 +206,8 @@ def the_model(F,To,q_R):
 
 		dTs_dt = (F[i] - I_l - LHF_l[i] - SHF_l)/C_eff
 		dms_dt = P[i]/(dt*h_s*theta) - E_s_l/mu_s
-		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l - sig*emis*(th_l[i]**4))/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
-		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o - sig*emis*(th_o[i]**4))/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
+		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l - sig*emis*(th_l[i]**4) + sig*emis*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
+		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o - sig*emis*(th_o[i]**4) + sig*emis*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
 		dql_dt = (q_o[i] - q_l[i])/tau + E_s_l/(h_bl*rho_a) + (q_ft - q_l[i])*we_l/h_bl
 		dqo_dt = -(q_o[i] - q_l[i])/tau + E_s_o/(h_bl*rho_a) + (q_ft - q_o[i])*we_o/h_bl
 
@@ -222,14 +222,13 @@ def the_model(F,To,q_R):
 
 	return(Ts,m_s,th_l,th_o,q_l,q_o)
 	
-F,T,q = make_forcing(50)
+F,T,q = make_forcing(100, T_mean=290)
 Ts,m_s,th_l,th_o,q_l,q_o = the_model(F,T,q)
 
 Ts_C = [x-273 for x in Ts]
-# plt.plot(np.arange(len(Ts)),Ts)
-plt.hist(Ts_C, bins = 40)
+# plt.plot(np.arange(len(Ts)),m_s)
+plt.hist(m_s, bins = 40)
 plt.xlabel('land surface temp in C')
-plt.suptitle(f'mean = {np.mean(Ts_C)},skew = {skew(Ts_C)}, oceantemp = {T[0]}')
+plt.suptitle(f'mean = {np.mean(Ts_C)},skew = {skew(Ts_C)}, oceantemp = {T[0]-273}')
 plt.show()
 # plt.savefig('lucas_code.png')
-# skewness is 
