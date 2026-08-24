@@ -166,7 +166,7 @@ def the_model(F,To,q_R):
 ####################################################################################
 
 	sec_per_day = 86400		# seconds per day
-	dt = 86400./steps_per_day		# time increment (10 chunks per day)
+	dt = 86400./steps_per_day		# time increment
 	i = 0
 
 	while i < N-1:
@@ -185,7 +185,7 @@ def the_model(F,To,q_R):
 		q_diff_o = qs_sat_o - q_o[i]
 		
 		if q_diff_l > 0:
-			E_s_l = rho_a*m_s[i]*q_diff_l/(r_ls*theta)		# Surface Transpiration - no theta?
+			E_s_l = rho_a*m_s[i]*q_diff_l/(r_ls)		# Surface Transpiration - no theta?
 		else:
 			E_s_l = 0
 
@@ -205,14 +205,14 @@ def the_model(F,To,q_R):
 		C_eff = h_s*(c_pl*rho_s + c_po*m_s[i]*rho_l)	# Effective heat capacity of storage [J/m^2/K]
 
 		dTs_dt = (F[i] - I_l - LHF_l[i] - SHF_l)/C_eff
-		dms_dt = P[i]/(dt*h_s*theta) - E_s_l/mu_s
+		dms_dt = P[i]/(h_s) - E_s_l/mu_s
 		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l - sig*emis*(th_l[i]**4) + sig*emis*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
 		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o - sig*emis*(th_o[i]**4) + sig*emis*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
 		dql_dt = (q_o[i] - q_l[i])/tau + E_s_l/(h_bl*rho_a) + (q_ft - q_l[i])*we_l/h_bl
 		dqo_dt = -(q_o[i] - q_l[i])/tau + E_s_o/(h_bl*rho_a) + (q_ft - q_o[i])*we_o/h_bl
 
 		Ts[i+1] 	= Ts[i] + dTs_dt*dt
-		m_s[i+1]	= min(m_s[i] + dms_dt*dt, theta) # cap soil moisture at 1?? 
+		m_s[i+1]	= min(m_s[i] + dms_dt*dt, 1) # cap soil moisture at 1?? 
 		th_l[i+1]	= th_l[i] + dthl_dt*dt
 		th_o[i+1]	= th_o[i] + dtho_dt*dt
 		q_l[i+1]	= q_l[i] + dql_dt*dt
@@ -227,7 +227,7 @@ Ts,m_s,th_l,th_o,q_l,q_o = the_model(F,T,q)
 
 Ts_C = [x-273 for x in Ts]
 # plt.plot(np.arange(len(Ts)),m_s)
-plt.hist(m_s, bins = 40)
+plt.hist(Ts_C, bins = 40)
 plt.xlabel('land surface temp in C')
 plt.suptitle(f'mean = {np.mean(Ts_C)},skew = {skew(Ts_C)}, oceantemp = {T[0]-273}')
 plt.show()
