@@ -171,8 +171,10 @@ def the_model(F,To,q_R):
 
 	while i < N-1:
 
-		I_l = sig*(Ts[i]**4) - sig*emis*(th_l[i]**4)
-		I_o = sig*(To[i]**4) - sig*emis*(th_o[i]**4)
+		I_sl = sig*(Ts[i]**4) - sig*emis*(th_l[i]**4)
+		I_al = sig*emis*(Ts[i]**4) - 2*sig*emis*(th_l[i]**4) + sig*emis*th_ft**4
+		I_ao = sig*emis*(To[i]**4) - 2*sig*emis*(th_o[i]**4) + sig*emis*th_ft**4
+		# I_so = sig*(To[i]**4) - sig*emis*(th_o[i]**4) 
 		SHF_l = c_pa*rho_a*(Ts[i] - th_l[i])/r_ss
 		SHF_o = c_pa*rho_a*(To[i] - th_o[i])/r_so
 
@@ -204,10 +206,10 @@ def the_model(F,To,q_R):
 		LHF_l[i] = L*E_s_l
 		C_eff = h_s*(c_pl*rho_s + c_po*m_s[i]*rho_l)	# Effective heat capacity of storage [J/m^2/K]
 
-		dTs_dt = (F[i] - I_l - LHF_l[i] - SHF_l)/C_eff
+		dTs_dt = (F[i] - I_sl - LHF_l[i] - SHF_l)/C_eff
 		dms_dt = P[i]/(h_s) - E_s_l/mu_s
-		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l - sig*emis*(th_l[i]**4) + sig*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
-		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o - sig*emis*(th_o[i]**4) + sig*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
+		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_al)/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
+		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_ao)/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
 		dql_dt = (q_o[i] - q_l[i])/tau + E_s_l/(h_bl*rho_a) + (q_ft - q_l[i])*we_l/h_bl
 		dqo_dt = -(q_o[i] - q_l[i])/tau + E_s_o/(h_bl*rho_a) + (q_ft - q_o[i])*we_o/h_bl
 
