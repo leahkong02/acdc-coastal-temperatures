@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import numpy.random as rand
 from netCDF4 import Dataset
+from scipy.stats import pearsonr, skew
 
 global steps_per_day
 steps_per_day = 20
@@ -17,7 +18,7 @@ def calc_q_s(T,P):
 	es = e_s(T)
 	return(es*0.622/(P - 0.37*es))
 
-def make_forcing(Nyears):
+def make_forcing(Nyears, T_mean=290):
 
 	#### RETURN F_forcing, T_forcing, Q_forcing
 
@@ -30,14 +31,13 @@ def make_forcing(Nyears):
 	Time = np.arange(Nmons)
 	Time_model = np.linspace(0,Nmons-1,N)
 
-	Fmean = 160
-	Famp = 80
+	Fmean = 240
+	Famp = 0
 	rand_F = 30
 
 	F_cyc = -Famp*np.cos(2*np.pi*Time/12)
 
-	T_mean = 290
-	T_amp = 4
+	T_amp = 0
 	rand_T = 0
 	T_cyc = -T_amp*np.cos(2*np.pi*Time/12 - np.pi/6) # keep fixed and just see what happens for different forcings
 	# do perpetual summer for forcing instead (no winter ! )
@@ -101,7 +101,6 @@ def the_model(F,To,q_R):
 ###################### SIMPLE MODEL FOR FIGURE 3 #########################
 ##################################################################################
 
-	from scipy.stats import pearsonr
 
 ################################ PHYSICAL CONSTANTS ###############################
 
@@ -116,13 +115,14 @@ def the_model(F,To,q_R):
 	r_so = 1000
 	r_ls = 250
 	r_ss = 1000
-	we_l = 0.01
-	we_o = 0.004
-	th_ft = 293
-	q_ft = calc_q_s(th_ft, 900)*0.5
+	we_l = 0.005
+	we_o = 0.005
+	th_ft = 290
+	q_ft = 0.003 #calc_q_s(th_ft, 900)*0.5
 	tau = 86400*2 #stochasticity would be very fun or calculate statistically 
 	h_s = 0.1
 	h_bl = 1000
+	theta = 0.45
 
 ############### Physical Constants
 	
@@ -155,8 +155,8 @@ def the_model(F,To,q_R):
 	m_s[0] = 0.01			# ""			surface moisture
 	th_l[0] = 298
 	th_o[0] = 298
-	q_l[0] = 0.0001
-	q_o[0] = 0.0005
+	q_l[0] = 0.005
+	q_o[0] = 0.008
 ############## PRECIP STUFF ###################################################
 
 	P_avg = 8				# average precipitation intensity [mm] precip very different across west and east coasts
@@ -173,8 +173,8 @@ def the_model(F,To,q_R):
 
 		I_l = sig*(Ts[i]**4) - sig*emis*(th_l[i]**4)
 		I_o = sig*(To[i]**4) - sig*emis*(th_o[i]**4)
-		SHF_l = c_pl*rho_a*(Ts[i] - th_l[i])/r_ss
-		SHF_o = c_po*rho_a*(To[i] - th_o[i])/r_so
+		SHF_l = c_pa*rho_a*(Ts[i] - th_l[i])/r_ss
+		SHF_o = c_pa*rho_a*(To[i] - th_o[i])/r_so
 
 		es_sat_l = e_s(Ts[i])
 		qs_sat_l = es_sat_l*0.622/(P_s - 0.37*es_sat_l)
@@ -185,12 +185,14 @@ def the_model(F,To,q_R):
 		q_diff_o = qs_sat_o - q_o[i]
 		
 		if q_diff_l > 0:
-			E_s_l = rho_a*m_s[i]*q_diff_l/(r_ls)		# Surface Transpiration - no theta?
+			E_s_l = rho_a*m_s[i]*q_diff_l/(r_ls*theta)		# Surface Transpiration - no theta?
 		else:
 			E_s_l = 0
 
 		if q_diff_o > 0:
 			E_s_o = rho_a*q_diff_o/(r_lo)
+		else:
+			E_s_o = 0
 
 		does_rain = rand.rand()
 		if does_rain < omega:
@@ -203,14 +205,14 @@ def the_model(F,To,q_R):
 		C_eff = h_s*(c_pl*rho_s + c_po*m_s[i]*rho_l)	# Effective heat capacity of storage [J/m^2/K]
 
 		dTs_dt = (F[i] - I_l - LHF_l[i] - SHF_l)/C_eff
-		dms_dt = P[i]/(dt*h_s) - E_s_l/mu_s
+		dms_dt = P[i]/(dt*h_s*theta) - E_s_l/mu_s
 		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l - sig*emis*(th_l[i]**4))/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
 		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o - sig*emis*(th_o[i]**4))/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
 		dql_dt = (q_o[i] - q_l[i])/tau + E_s_l/(h_bl*rho_a) + (q_ft - q_l[i])*we_l/h_bl
 		dqo_dt = -(q_o[i] - q_l[i])/tau + E_s_o/(h_bl*rho_a) + (q_ft - q_o[i])*we_o/h_bl
 
 		Ts[i+1] 	= Ts[i] + dTs_dt*dt
-		m_s[i+1]	= min(m_s[i] + dms_dt*dt, 1) # cap soil moisture at 1?? 
+		m_s[i+1]	= min(m_s[i] + dms_dt*dt, theta) # cap soil moisture at 1?? 
 		th_l[i+1]	= th_l[i] + dthl_dt*dt
 		th_o[i+1]	= th_o[i] + dtho_dt*dt
 		q_l[i+1]	= q_l[i] + dql_dt*dt
@@ -220,10 +222,14 @@ def the_model(F,To,q_R):
 
 	return(Ts,m_s,th_l,th_o,q_l,q_o)
 	
-F,T,q = make_forcing(60)
+F,T,q = make_forcing(50)
 Ts,m_s,th_l,th_o,q_l,q_o = the_model(F,T,q)
 
-plt.plot(np.arange(len(Ts)),Ts)
+Ts_C = [x-273 for x in Ts]
+# plt.plot(np.arange(len(Ts)),Ts)
+plt.hist(Ts_C, bins = 40)
+plt.xlabel('land surface temp in C')
+plt.suptitle(f'mean = {np.mean(Ts_C)},skew = {skew(Ts_C)}, oceantemp = {T[0]}')
 plt.show()
 # plt.savefig('lucas_code.png')
 # skewness is 
