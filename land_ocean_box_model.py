@@ -11,19 +11,8 @@ plt.rcParams.update(
         "font.family": "sans-serif",
         "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
         "font.size": 9.0,
-        "svg.fonttype": "none",
-        "pdf.fonttype": 42,
     }
 )
-
-
-def clean_svg(path):
-
-    svg_text = path.read_text(encoding="utf-8")
-
-    clean_text = "\n".join(line.rstrip() for line in svg_text.splitlines()) + "\n"
-
-    path.write_text(clean_text, encoding="utf-8")
 
 # ============================================================
 # TIME
@@ -35,7 +24,7 @@ steps_per_day = 24
 
 dt = day / steps_per_day
 
-nyears = 300
+nyears = 100
 
 spinup_years = 10
 
@@ -109,7 +98,7 @@ r_SS = 1000.0
 # LAND-OCEAN MIXING
 # ============================================================
 
-tau_mix = 2.0 * day
+tau_mix = 1.0 * day
 
 # ============================================================
 # FREE-TROPOSPHERIC ENTRAINMENT
@@ -132,40 +121,46 @@ To = 288.0
 dTo_dt = 0.0
 
 # ============================================================
-# LINEARIZED SATURATION SPECIFIC HUMIDITY
+# NONLINEAR SATURATION SPECIFIC HUMIDITY
 # ============================================================
 
-Tref = 293.0
+Tc_o = To - 273.15
 
-Tc_ref = Tref - 273.15
+es_o = 6.11 * 10.0**(7.5 * Tc_o / (237.5 + Tc_o))
 
-es_ref = 6.11 * 10.0**(7.5 * Tc_ref / (237.5 + Tc_ref))
-
-qs_ref = 0.622 * es_ref / (p_s - 0.37 * es_ref)
-
-gamma_q = qs_ref * Lv / (Rv * Tref**2)
-
-qs_o = qs_ref + gamma_q * (To - Tref)
+qs_o = 0.622 * es_o / (p_s - 0.37 * es_o)
 
 # ============================================================
-# SEASONAL FORCING
+# STATIONARY STOCHASTIC RADIATIVE FORCING
 # ============================================================
 
 Fmean = 160.0
 
-Famp = 80.0
+Fnoise_std = 30.0
+
+tau_F = 5.0 * day
 
 TFTmean = 290.0
 
-TFTamp = 4.0
-
 qFT = 0.003
 
-phase = 2.0 * np.pi * t_days / 365.0
+rng_forcing = np.random.default_rng(123)
 
-F = Fmean - Famp * np.cos(phase)
+rho_F = np.exp(-dt / tau_F)
 
-theta_FT = TFTmean - TFTamp * np.cos(phase - np.pi / 6.0)
+innovation_std = Fnoise_std * np.sqrt(1.0 - rho_F**2)
+
+Fnoise = np.zeros(nt)
+
+for i in range(nt - 1):
+    Fnoise[i + 1] = rho_F * Fnoise[i] + rng_forcing.normal(
+        0.0,
+        innovation_std,
+    )
+
+F = np.maximum(Fmean + Fnoise, 0.0)
+
+theta_FT = np.full(nt, TFTmean)
 
 # ============================================================
 # STOCHASTIC PRECIPITATION
@@ -227,12 +222,14 @@ for i in range(nt - 1):
 
     # --------------------------------------------------------
     # Saturation specific humidity
-    # q*(Ts) = q*_ref + gamma * (Ts - Tref)
+    # Tetens saturation vapor pressure and specific humidity
     # --------------------------------------------------------
 
-    qs_L = qs_ref + gamma_q * (Ts[i] - Tref)
+    Tc_L = Ts[i] - 273.15
 
-    qs_L = max(qs_L, 0.0)
+    es_L = 6.11 * 10.0**(7.5 * Tc_L / (237.5 + Tc_L))
+
+    qs_L = 0.622 * es_L / (p_s - 0.37 * es_L)
 
     # --------------------------------------------------------
     # LAND EVAPORATION
@@ -412,7 +409,7 @@ for i in range(nt - 1):
     q_o[i + 1] = max(q_o[i + 1], 0.0)
 
 # ============================================================
-# SELECT JJA AFTER SPIN-UP
+# SELECT A FIXED CALENDAR-JJA WINDOW AFTER SPIN-UP
 # ============================================================
 
 after_spinup = t_days >= spinup_years * 365.0
@@ -443,11 +440,11 @@ Ts_std = np.std(Ts_summer)
 
 Ts_skew = np.mean(Ts_anom**3) / Ts_std**3
 
-print("JJA mean Ts =", np.mean(Ts_summer), "K")
+print("Calendar-JJA mean Ts =", np.mean(Ts_summer), "K")
 
-print("JJA std Ts =", Ts_std, "K")
+print("Calendar-JJA std Ts =", Ts_std, "K")
 
-print("JJA skewness =", Ts_skew)
+print("Calendar-JJA skewness =", Ts_skew)
 
 # ============================================================
 # PLOT 1: SUMMER TEMPERATURE PDF
@@ -461,25 +458,13 @@ plt.xlabel("Land surface temperature (°C)")
 
 plt.ylabel("Probability density")
 
-plt.title("JJA land temperature")
+plt.title("Calendar-JJA land temperature under stationary forcing")
 
 plt.tight_layout()
 
 plt.savefig(
     OUTPUT_DIR / "land_ocean_jja_temperature_distribution.png",
-    dpi=600,
-    bbox_inches="tight",
-)
-
-plt.savefig(
-    OUTPUT_DIR / "land_ocean_jja_temperature_distribution.svg",
-    bbox_inches="tight",
-)
-
-clean_svg(OUTPUT_DIR / "land_ocean_jja_temperature_distribution.svg")
-
-plt.savefig(
-    OUTPUT_DIR / "land_ocean_jja_temperature_distribution.pdf",
+    dpi=300,
     bbox_inches="tight",
 )
 
@@ -506,25 +491,13 @@ plt.xlabel("Soil moisture")
 
 plt.ylabel("Land surface temperature (°C)")
 
-plt.title("JJA soil moisture-temperature relationship")
+plt.title("Calendar-JJA soil moisture-temperature relationship")
 
 plt.tight_layout()
 
 plt.savefig(
     OUTPUT_DIR / "land_ocean_jja_soil_moisture_temperature.png",
-    dpi=600,
-    bbox_inches="tight",
-)
-
-plt.savefig(
-    OUTPUT_DIR / "land_ocean_jja_soil_moisture_temperature.svg",
-    bbox_inches="tight",
-)
-
-clean_svg(OUTPUT_DIR / "land_ocean_jja_soil_moisture_temperature.svg")
-
-plt.savefig(
-    OUTPUT_DIR / "land_ocean_jja_soil_moisture_temperature.pdf",
+    dpi=300,
     bbox_inches="tight",
 )
 
@@ -557,19 +530,7 @@ plt.tight_layout()
 
 plt.savefig(
     OUTPUT_DIR / "land_ocean_last_five_year_temperature_timeseries.png",
-    dpi=600,
-    bbox_inches="tight",
-)
-
-plt.savefig(
-    OUTPUT_DIR / "land_ocean_last_five_year_temperature_timeseries.svg",
-    bbox_inches="tight",
-)
-
-clean_svg(OUTPUT_DIR / "land_ocean_last_five_year_temperature_timeseries.svg")
-
-plt.savefig(
-    OUTPUT_DIR / "land_ocean_last_five_year_temperature_timeseries.pdf",
+    dpi=300,
     bbox_inches="tight",
 )
 
