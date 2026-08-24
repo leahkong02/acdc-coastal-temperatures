@@ -177,26 +177,31 @@ H_{L}=\frac{\rho_{a}c_{p}}{r_{SS}}(T_{s}-\theta_{L}),
 H_{o}=\frac{\rho_{a}c_{p}}{r_{SO}}(T_{o}-\theta_{o}).
 $$
 
-The subscripts $LS$ and $SS$ denote land latent and sensible resistances; $LO$ and $SO$ denote their ocean counterparts. During integration, saturation specific humidity is linearized about a reference state:
+The subscripts $LS$ and $SS$ denote land latent and sensible resistances; $LO$ and $SO$ denote their ocean counterparts. Saturation specific humidity is evaluated nonlinearly at the land and ocean surface temperatures using
 
 ```math
-q_s^{\ast}(T) \simeq q_{\mathrm{ref}}^{\ast}+\gamma_q(T-T_{\mathrm{ref}}),\qquad \gamma_q \simeq \frac{q_{\mathrm{ref}}^{\ast}L_v}{R_vT_{\mathrm{ref}}^2}.
+T_C=T-273.15,\qquad
+e_s(T)=6.11\times10^{\frac{7.5T_C}{237.5+T_C}},\qquad
+q_s^{\ast}(T)=\frac{0.622e_s(T)}{p_s-0.37e_s(T)},
 ```
 
-### Seasonal forcing and stochastic precipitation
+where $e_s$ and $p_s$ are expressed in hPa.
 
-The seasonal forcing is
+### Stationary radiative forcing and stochastic precipitation
 
-$$
-F(t)=F_0-F_1\cos\!\left(\frac{2\pi t}{T_{\rm yr}}\right),
-$$
+The updated experiment has no annual cycle. Surface radiative forcing is a stationary, nonnegative AR(1) process,
 
 $$
-\theta_{FT}(t)=\theta_{FT,0}-\theta_{FT,1}
-\cos\!\left(\frac{2\pi t}{T_{\rm yr}}-\varphi_T\right),
+F_n=\max(F_0+F_n^{\prime},0),
 $$
 
-with constant $q_{FT}$. Suggested inherited values are $F_0=160\ \mathrm{W\,m^{-2}}$, $F_1=80\ \mathrm{W\,m^{-2}}$, $\theta_{FT,0}=290\ \mathrm{K}$, and $\theta_{FT,1}=4\ \mathrm{K}$.
+$$
+F_{n+1}^{\prime}=\rho_FF_n^{\prime}+\eta_n,
+\qquad
+\rho_F=\exp\!\left(-\frac{\Delta t}{\tau_F}\right),
+$$
+
+where $\eta_n$ is Gaussian with variance $\sigma_F^2(1-\rho_F^2)$. The parameters are $F_0=160\ \mathrm{W\,m^{-2}}$, $\sigma_F=30\ \mathrm{W\,m^{-2}}$, $\tau_F=5$ days, and random seed 123. Free-tropospheric conditions are constant: $\theta_{FT}=290\ \mathrm{K}$ and $q_{FT}=0.003$.
 
 Rain events are sampled as a Poisson process with rate $\lambda_P=0.2\ \mathrm{day^{-1}}$. For an event, rainfall depth follows
 
@@ -210,21 +215,21 @@ so the mean event depth is $8\ \mathrm{mm}$.
 
 ## Reference numerical experiment
 
-The committed reference experiment integrates 300 years with an hourly timestep, removes the first 10 years as spin-up, fixes $T_o=288\ \mathrm{K}$, and uses random seed 42. For JJA after spin-up, the run gives
+The committed reference experiment integrates 100 years with an hourly timestep, removes the first 10 years as spin-up, fixes $T_o=288\ \mathrm{K}$, and uses a 1-day land--ocean mixing timescale. Radiative forcing uses random seed 123 and precipitation uses seed 42. For model days 151--242 after spin-up, the run gives
 
-- mean land surface temperature: $300.716\ \mathrm{K}$;
-- standard deviation: $3.355\ \mathrm{K}$;
-- skewness: $0.368$.
+- mean land surface temperature: $288.584\ \mathrm{K}$;
+- standard deviation: $3.242\ \mathrm{K}$;
+- population skewness: $0.225$.
 
-These values and figures are deterministic outputs of the current code and parameter set, not observational validation.
+Because the forcing is stationary and has no annual cycle, this fixed calendar-JJA window is only a consistent subsample of the stationary integration; it is not a physically distinct simulated summer season. These values and figures are deterministic outputs of the current code and parameter set, not observational validation.
 
-### JJA land-temperature distribution
+### Calendar-JJA land-temperature distribution
 
-![JJA land-temperature probability density](figures/land_ocean_jja_temperature_distribution.png)
+![Calendar-JJA land-temperature probability density](figures/land_ocean_jja_temperature_distribution.png)
 
-### Soil moisture--temperature relationship
+### Calendar-JJA soil moisture--temperature relationship
 
-![JJA soil moisture and land-temperature relationship](figures/land_ocean_jja_soil_moisture_temperature.png)
+![Calendar-JJA soil moisture and land-temperature relationship](figures/land_ocean_jja_soil_moisture_temperature.png)
 
 ### Last five simulated years
 
@@ -238,8 +243,8 @@ These values and figures are deterministic outputs of the current code and param
 - `cpc_northern_hemisphere_summer_skewness.py`: CPC download, anomaly, skewness, and polar-map workflow.
 - `figures/cpc_northern_hemisphere_jja_tmax_anomaly_skewness_1985_2014.png`: observed Northern Hemisphere JJA anomaly-skewness map.
 - `figures/land_ocean_box_model_schematic.png`: model schematic.
-- `figures/land_ocean_jja_temperature_distribution.png`: JJA land-temperature distribution.
-- `figures/land_ocean_jja_soil_moisture_temperature.png`: JJA soil moisture--temperature relationship.
+- `figures/land_ocean_jja_temperature_distribution.png`: fixed calendar-JJA land-temperature distribution.
+- `figures/land_ocean_jja_soil_moisture_temperature.png`: fixed calendar-JJA soil moisture--temperature relationship.
 - `figures/land_ocean_last_five_year_temperature_timeseries.png`: final five-year temperature evolution.
 
 Run the numerical experiment and regenerate its three figures with:
