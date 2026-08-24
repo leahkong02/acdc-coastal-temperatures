@@ -39,7 +39,8 @@ def make_forcing(Nyears):
 	T_mean = 290
 	T_amp = 4
 	rand_T = 0
-	T_cyc = -T_amp*np.cos(2*np.pi*Time/12 - np.pi/6)
+	T_cyc = -T_amp*np.cos(2*np.pi*Time/12 - np.pi/6) # keep fixed and just see what happens for different forcings
+	# do perpetual summer for forcing instead (no winter ! )
 
 	q_mean = 0.003
 	q_amp  = 0
@@ -119,7 +120,7 @@ def the_model(F,To,q_R):
 	we_o = 0.004
 	th_ft = 293
 	q_ft = calc_q_s(th_ft, 900)*0.5
-	tau = 8000
+	tau = 86400*2 #stochasticity would be very fun or calculate statistically 
 	h_s = 0.1
 	h_bl = 1000
 
@@ -158,7 +159,7 @@ def the_model(F,To,q_R):
 	q_o[0] = 0.0005
 ############## PRECIP STUFF ###################################################
 
-	P_avg = 8				# average precipitation intensity [mm]
+	P_avg = 8				# average precipitation intensity [mm] precip very different across west and east coasts
 	a_1 = .2				# precip frequency [1/days]
 	omega = a_1/steps_per_day
 
@@ -172,8 +173,8 @@ def the_model(F,To,q_R):
 
 		I_l = sig*(Ts[i]**4) - sig*emis*(th_l[i]**4)
 		I_o = sig*(To[i]**4) - sig*emis*(th_o[i]**4)
-		SHF_l = c_pl*rho_a*(th_l[i] - Ts[i])/r_ss
-		SHF_o = c_po*rho_a*(th_o[i] - To[i])/r_so
+		SHF_l = c_pl*rho_a*(Ts[i] - th_l[i])/r_ss
+		SHF_o = c_po*rho_a*(To[i] - th_o[i])/r_so
 
 		es_sat_l = e_s(Ts[i])
 		qs_sat_l = es_sat_l*0.622/(P_s - 0.37*es_sat_l)
@@ -203,8 +204,8 @@ def the_model(F,To,q_R):
 
 		dTs_dt = (F[i] - I_l - LHF_l[i] - SHF_l)/C_eff
 		dms_dt = P[i]/(dt*h_s) - E_s_l/mu_s
-		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l)/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
-		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o)/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
+		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l - sig*emis*(th_l[i]**4))/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
+		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o - sig*emis*(th_o[i]**4))/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
 		dql_dt = (q_o[i] - q_l[i])/tau + E_s_l/(h_bl*rho_a) + (q_ft - q_l[i])*we_l/h_bl
 		dqo_dt = -(q_o[i] - q_l[i])/tau + E_s_o/(h_bl*rho_a) + (q_ft - q_o[i])*we_o/h_bl
 
@@ -219,10 +220,10 @@ def the_model(F,To,q_R):
 
 	return(Ts,m_s,th_l,th_o,q_l,q_o)
 	
-
 F,T,q = make_forcing(60)
 Ts,m_s,th_l,th_o,q_l,q_o = the_model(F,T,q)
 
-plt.plot(np.arange(len(Ts)),m_s)
+plt.plot(np.arange(len(Ts)),Ts)
 plt.show()
 # plt.savefig('lucas_code.png')
+# skewness is 
