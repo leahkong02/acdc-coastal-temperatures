@@ -218,10 +218,10 @@ def the_model(F, T_ocean):
         DLR = sig*emis*(theta_land[i]**4)
         
         ########### LONGWAVE RADIATION FOR ATM OVER LAND
-        LR_l = sig*(Ts[i]**4) + sig*emis*(theta_ft[i]**4) - 2*sig*emis*(theta_land[i]**4)
+        LR_l = sig*emis*(Ts[i]**4) + sig*emis*(theta_ft[i]**4) - 2*sig*emis*(theta_land[i]**4)
         
         ########### LONGWAVE RADIATION FOR ATM OVER OCEAN
-        LR_o = sig*(T_ocean[i]**4) + sig*emis*(theta_ft[i]**4) - 2*sig*emis*(theta_ocean[i]**4)
+        LR_o = sig*emis*(T_ocean[i]**4) + sig*emis*(theta_ft[i]**4) - 2*sig*emis*(theta_ocean[i]**4)
 
         ########## LAND SENSIBLE HEAT FLUX
 
