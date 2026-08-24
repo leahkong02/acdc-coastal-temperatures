@@ -206,8 +206,8 @@ def the_model(F,To,q_R):
 
 		dTs_dt = (F[i] - I_l - LHF_l[i] - SHF_l)/C_eff
 		dms_dt = P[i]/(h_s) - E_s_l/mu_s
-		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l - sig*emis*(th_l[i]**4) + sig*emis*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
-		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o - sig*emis*(th_o[i]**4) + sig*emis*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
+		dthl_dt = (th_o[i] - th_l[i])/tau + (SHF_l + I_l - sig*emis*(th_l[i]**4) + sig*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_l[i])*we_l/h_bl
+		dtho_dt = -(th_o[i] - th_l[i])/tau + (SHF_o + I_o - sig*emis*(th_o[i]**4) + sig*emis*th_ft**4)/(c_pa*rho_a*h_bl) + (th_ft - th_o[i])*we_o/h_bl
 		dql_dt = (q_o[i] - q_l[i])/tau + E_s_l/(h_bl*rho_a) + (q_ft - q_l[i])*we_l/h_bl
 		dqo_dt = -(q_o[i] - q_l[i])/tau + E_s_o/(h_bl*rho_a) + (q_ft - q_o[i])*we_o/h_bl
 
