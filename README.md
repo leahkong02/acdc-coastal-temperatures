@@ -215,11 +215,11 @@ so the mean event depth is $8\ \mathrm{mm}$.
 
 ## Reference numerical experiment
 
-The committed reference experiment integrates 100 years with an hourly timestep, removes the first 10 years as spin-up, fixes $T_o=288\ \mathrm{K}$, and uses a 1-day land--ocean mixing timescale. Radiative forcing uses random seed 123 and precipitation uses seed 42. For model days 151--242 after spin-up, the run gives
+The committed reference experiment integrates 100 years with an hourly timestep, removes the first 10 years as spin-up, fixes $T_o=290\ \mathrm{K}$, and uses 2-day land--ocean mixing and 2-day free-tropospheric entrainment timescales for both atmospheric boxes. Radiative forcing uses random seed 123 and precipitation uses seed 42. For model days 151--242 after spin-up, the run gives
 
-- mean land surface temperature: $288.584\ \mathrm{K}$;
-- standard deviation: $3.242\ \mathrm{K}$;
-- population skewness: $0.225$.
+- mean land surface temperature: $289.520\ \mathrm{K}$;
+- standard deviation: $3.864\ \mathrm{K}$;
+- population skewness: $0.545$.
 
 Because the forcing is stationary and has no annual cycle, this fixed calendar-JJA window is only a consistent subsample of the stationary integration; it is not a physically distinct simulated summer season. These values and figures are deterministic outputs of the current code and parameter set, not observational validation.
 
