@@ -1,12 +1,53 @@
 import numpy as np  # Numerical arrays and calculations
 import matplotlib.pyplot as plt  # Plotting
+import os
+from pathlib import Path
+
+OUTPUT_DIR = Path(__file__).resolve().parent / "figures"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+qa_pdf_dir_value = os.environ.get("FIGURE_QA_PDF_DIR")
+QA_PDF_DIR = Path(qa_pdf_dir_value).resolve() if qa_pdf_dir_value else None
+
+if QA_PDF_DIR is not None:
+    QA_PDF_DIR.mkdir(parents=True, exist_ok=True)
+
+plt.rcParams.update(
+    {
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
+        "font.size": 9.0,
+        "svg.fonttype": "none",
+        "pdf.fonttype": 42,
+    }
+)
+
+
+def save_current_figure(filename):
+    plt.savefig(OUTPUT_DIR / filename, dpi=300, bbox_inches="tight")
+
+    if QA_PDF_DIR is not None:
+        qa_stem = QA_PDF_DIR / Path(filename).stem
+
+        plt.savefig(qa_stem.with_suffix(".svg"), bbox_inches="tight")
+
+        plt.savefig(
+            qa_stem.with_suffix(".pdf"),
+            bbox_inches="tight",
+        )
+
+        plt.savefig(
+            qa_stem.with_suffix(".tiff"),
+            dpi=600,
+            bbox_inches="tight",
+        )
 
 # ============================================================
 # TIME
 
 # ============================================================
 day = 86400.0  # Seconds in one day
-steps_per_day = 24  # Model timesteps per day
+steps_per_day = 20  # Model timesteps per day
 dt = day / steps_per_day  # Timestep length [s]
 nyears = 100  # Total simulated years
 spinup_years = 10  # Discarded spin-up years
@@ -58,7 +99,7 @@ r_SS = 1000.0  # Land sensible-heat-transfer resistance [s m^-1]
 # LAND-OCEAN MIXING
 
 # ============================================================
-tau_mix = 2.31 * day  # Land-ocean mixing/relaxation timescale [s]
+tau_mix = 2.0 * day  # Land-ocean mixing/relaxation timescale [s]
 
 # ============================================================
 # FREE-TROPOSPHERIC ENTRAINMENT
@@ -66,8 +107,8 @@ tau_mix = 2.31 * day  # Land-ocean mixing/relaxation timescale [s]
 # ============================================================
 tau_ent_L = 2.0 * day  # Land BL entrainment timescale [s]
 tau_ent_o = 2.0 * day  # Ocean BL entrainment timescale [s]
-We_L = 1.0 / tau_ent_L  # Land BL entrainment rate [s^-1]
-We_o = 1.0 / tau_ent_o  # Ocean BL entrainment rate [s^-1]
+We_L = 5.0e-6  # Land BL entrainment rate [s^-1]
+We_o = 5.0e-6  # Ocean BL entrainment rate [s^-1]
 
 # ============================================================
 # FIXED OCEAN SST
@@ -110,13 +151,13 @@ qs_o = 0.622 * es_o / (p_s - 0.37 * es_o)  # Saturation specific humidity at oce
 # ============================================================
 
 Fmean = 240.0  # Mean surface radiative forcing [W m^-2]
-Fnoise_std = 0.0  # Equilibrium standard deviation [W m^-2]
-tau_F = 5.0 * day  # Noise decorrelation timescale
+Fnoise_std = 30.0  # Equilibrium standard deviation [W m^-2]
+tau_F = 0.001 * day  # Noise decorrelation timescale
 
 TFTmean = 290.0  # Constant free-tropospheric temperature [K]
 qFT = 0.003
 
-rng_forcing = np.random.default_rng(123)
+rng_forcing = np.random.default_rng(1)
 
 rho_F = np.exp(-dt / tau_F)
 noise_std = Fnoise_std * np.sqrt(1.0 - rho_F**2)
@@ -299,53 +340,58 @@ for i in range(nt - 1):  # Advance model through time
     q_o[i + 1] = max(q_o[i + 1], 0.0)  # Prevent negative ocean-air humidity
 
 # ============================================================
-# SELECT JJA AFTER SPIN-UP
+# SELECT THE FULL POST-SPIN-UP PERIOD
 
 # ============================================================
 after_spinup = t_days >= spinup_years * 365.0  # Select times after spin-up
-JJA = (day_of_year >= 151.0) & (day_of_year < 243.0)  # Select June-July-August
-summer = after_spinup & JJA  # Post-spin-up JJA mask
-Ts_summer = Ts[summer]  # JJA land surface temperature
-m_summer = m[summer]  # JJA normalized soil moisture
-theta_L_summer = theta_L[summer]  # JJA land-air temperature
-theta_o_summer = theta_o[summer]  # JJA ocean-air temperature
-q_L_summer = q_L[summer]  # JJA land-air specific humidity
-q_o_summer = q_o[summer]  # JJA ocean-air specific humidity
+Ts_analysis = Ts[after_spinup]  # Post-spin-up land surface temperature
+m_analysis = m[after_spinup]  # Post-spin-up normalized soil moisture
+theta_L_analysis = theta_L[after_spinup]  # Post-spin-up land-air temperature
+theta_o_analysis = theta_o[after_spinup]  # Post-spin-up ocean-air temperature
+q_L_analysis = q_L[after_spinup]  # Post-spin-up land-air specific humidity
+q_o_analysis = q_o[after_spinup]  # Post-spin-up ocean-air specific humidity
 
 # ============================================================
-# SUMMER STATISTICS
+# POST-SPIN-UP STATISTICS
 
 # ============================================================
-Ts_anom = Ts_summer - np.mean(Ts_summer)  # JJA land-temperature anomaly
-Ts_std = np.std(Ts_summer)  # JJA land-temperature standard deviation
-Ts_skew = np.mean(Ts_anom**3) / Ts_std**3  # JJA land-temperature skewness
-print("JJA mean Ts =", np.mean(Ts_summer), "K")  # Print JJA mean temperature
-print("JJA std Ts =", Ts_std, "K")  # Print JJA temperature standard deviation
-print("JJA skewness =", Ts_skew)  # Print JJA temperature skewness
+Ts_anom = Ts_analysis - np.mean(Ts_analysis)  # Post-spin-up land-temperature anomaly
+Ts_std = np.std(Ts_analysis)  # Post-spin-up land-temperature standard deviation
+Ts_skew = np.mean(Ts_anom**3) / Ts_std**3  # Post-spin-up land-temperature skewness
+print("Post-spin-up sample count =", Ts_analysis.size)
+print("Post-spin-up mean Ts =", np.mean(Ts_analysis), "K")
+print("Post-spin-up std Ts =", Ts_std, "K")
+print("Post-spin-up skewness =", Ts_skew)
 
 # ============================================================
-# PLOT 1: SUMMER TEMPERATURE PDF
+# PLOT 1: POST-SPIN-UP TEMPERATURE PDF
 
 # ============================================================
 plt.figure(figsize=(7, 4))  # Create figure
-plt.hist(Ts_summer - 273.15, bins=50, density=True)  # Plot JJA land-temperature PDF
+plt.hist(Ts_analysis - 273.15, bins=40, density=True)  # Plot post-spin-up land-temperature PDF
 plt.xlabel("Land surface temperature (°C)")  # Label x axis
 plt.ylabel("Probability density")  # Label y axis
-plt.title("JJA land temperature")  # Add plot title
+plt.title("Post-spin-up land temperature under stationary forcing")  # Add plot title
 plt.tight_layout()  # Adjust figure layout
-plt.show()  # Display figure
+save_current_figure("land_ocean_postspinup_temperature_distribution.png")
+if "agg" not in plt.get_backend().lower():
+    plt.show()
+plt.close()
 
 # ============================================================
-# PLOT 2: SOIL MOISTURE VS SUMMER TEMPERATURE
+# PLOT 2: SOIL MOISTURE VS POST-SPIN-UP TEMPERATURE
 
 # ============================================================
 plt.figure(figsize=(7, 4))  # Create figure
-plt.scatter(m_summer, Ts_summer - 273.15, s=2, alpha=0.15)  # Plot soil moisture versus JJA temperature
+plt.scatter(m_analysis, Ts_analysis - 273.15, s=2, alpha=0.15, rasterized=True)  # Plot soil moisture versus post-spin-up temperature
 plt.xlabel("Soil moisture")  # Label x axis
 plt.ylabel("Land surface temperature (°C)")  # Model calculation
-plt.title("JJA soil moisture-temperature relationship")  # Add plot title
+plt.title("Post-spin-up soil moisture-temperature relationship")  # Add plot title
 plt.tight_layout()  # Adjust figure layout
-plt.show()  # Display figure
+save_current_figure("land_ocean_postspinup_soil_moisture_temperature.png")
+if "agg" not in plt.get_backend().lower():
+    plt.show()
+plt.close()
 
 # ============================================================
 # PLOT 3: LAST FIVE YEARS
@@ -360,5 +406,8 @@ plt.xlabel("Year")  # Label x axis
 plt.ylabel("Temperature (°C)")  # Label y axis
 plt.legend()  # Add legend
 plt.tight_layout()  # Adjust figure layout
-plt.show()  # Display figure
+save_current_figure("land_ocean_last_five_year_temperature_timeseries.png")
+if "agg" not in plt.get_backend().lower():
+    plt.show()
+plt.close()
 # constant mixing; variable mixing between the ocean and land
