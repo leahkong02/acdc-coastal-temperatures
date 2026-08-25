@@ -45,7 +45,7 @@ $$
 where $T_s$ is land surface temperature, $m\in[0,1]$ is normalized soil moisture, and $(\theta_L,q_L)$ and $(\theta_o,q_o)$ are the land and ocean atmospheric temperature--humidity pairs. Ocean surface temperature is fixed:
 
 $$
-\frac{dT_o}{dt}=0, \qquad T_o=\text{constant}.
+\frac{dT_o}{dt}=0, \qquad T_o=270\ \mathrm{K}.
 $$
 
 Near-surface air temperatures are approximated by the corresponding atmospheric box temperatures, $T_{a,L}\simeq\theta_L$ and $T_{a,o}\simeq\theta_o$.
@@ -75,7 +75,7 @@ W_{\max}=\rho_l h_s\phi,
 \qquad 0\le m\le1.
 $$
 
-Here $F(t)$ is the seasonal surface forcing, $P$ is stochastic precipitation, $E_L$ is land evaporation, and $H_L$ is the land sensible heat flux.
+Here $F(t)$ is stationary stochastic surface radiative forcing, $P$ is stochastic precipitation, $E_L$ is land evaporation, and $H_L$ is the land sensible heat flux.
 
 ### Land and ocean atmospheric boxes
 
@@ -113,18 +113,18 @@ $$
 +W_{eo}(q_{FT}-q_o).
 $$
 
-The atmospheric heat and mass capacities are $C_A=\rho_a c_p h_A$ and $M_A=\rho_a h_A$. The exchange timescale $\tau_{\rm mix}$ couples the two atmospheric boxes. The coefficients $W_{eL}$ and $W_{eo}$ represent entrainment from a prescribed free troposphere $(\theta_{FT},q_{FT})$. The terms $R_L$ and $R_o$ are the net longwave heating rates of the land and ocean atmospheric boxes.
+The atmospheric heat and mass capacities are $C_A=\rho_a c_p h_A$ and $M_A=\rho_a h_A$. The exchange timescale $\tau_{\rm mix}=2$ days couples the two atmospheric boxes. The implemented entrainment coefficients are $W_{eL}=W_{eo}=5\times10^{-6}\ \mathrm{s^{-1}}$, equivalent to an e-folding timescale of approximately $2.315$ days. The terms $R_L$ and $R_o$ are the net longwave heating rates of the land and ocean atmospheric boxes.
 
 ### Longwave radiation closure
 
 The current experiment uses surface, atmospheric-box, and free-tropospheric effective emissivities
 
 $$
-\epsilon_s=0.98,
+\epsilon_s=1.00,
 \qquad
-\epsilon_A=0.75,
+\epsilon_A=0.67,
 \qquad
-\epsilon_{FT}=0.70.
+\epsilon_{FT}=0.67.
 $$
 
 Upward longwave emission from the land and prescribed ocean surfaces is
@@ -201,7 +201,7 @@ F_{n+1}^{\prime}=\rho_FF_n^{\prime}+\eta_n,
 \rho_F=\exp\!\left(-\frac{\Delta t}{\tau_F}\right),
 $$
 
-where $\eta_n$ is Gaussian with variance $\sigma_F^2(1-\rho_F^2)$. The parameters are $F_0=160\ \mathrm{W\,m^{-2}}$, $\sigma_F=30\ \mathrm{W\,m^{-2}}$, $\tau_F=5$ days, and random seed 123. Free-tropospheric conditions are constant: $\theta_{FT}=290\ \mathrm{K}$ and $q_{FT}=0.003$.
+where $\eta_n$ is Gaussian with variance $\sigma_F^2(1-\rho_F^2)$. The parameters are $F_0=240\ \mathrm{W\,m^{-2}}$, $\sigma_F=30\ \mathrm{W\,m^{-2}}$, $\tau_F=0.001$ day, and random seed 1. With $\Delta t=0.05$ day, $\rho_F=\exp(-50)\simeq1.93\times10^{-22}$, so successive forcing anomalies are effectively independent at the model timestep. Free-tropospheric conditions are constant: $\theta_{FT}=290\ \mathrm{K}$ and $q_{FT}=0.003$.
 
 Rain events are sampled as a Poisson process with rate $\lambda_P=0.2\ \mathrm{day^{-1}}$. For an event, rainfall depth follows
 
@@ -215,21 +215,21 @@ so the mean event depth is $8\ \mathrm{mm}$.
 
 ## Reference numerical experiment
 
-The committed reference experiment integrates 100 years with an hourly timestep, removes the first 10 years as spin-up, fixes $T_o=290\ \mathrm{K}$, and uses 2-day land--ocean mixing and 2-day free-tropospheric entrainment timescales for both atmospheric boxes. Radiative forcing uses random seed 123 and precipitation uses seed 42. For model days 151--242 after spin-up, the run gives
+The committed reference experiment integrates 100 years with 20 timesteps per day ($\Delta t=1.2$ hours), removes the first 10 years as spin-up, fixes $T_o=270\ \mathrm{K}$, uses $\tau_{\rm mix}=2$ days, and applies $W_{eL}=W_{eo}=5\times10^{-6}\ \mathrm{s^{-1}}$. Radiative forcing uses seed 1 and precipitation uses seed 42. The full 90-year post-spin-up sample contains 657,000 timesteps and gives
 
-- mean land surface temperature: $289.520\ \mathrm{K}$;
-- standard deviation: $3.864\ \mathrm{K}$;
-- population skewness: $0.545$.
+- mean land surface temperature: $295.276\ \mathrm{K}$;
+- standard deviation: $2.986\ \mathrm{K}$;
+- population skewness: $0.482$.
 
-Because the forcing is stationary and has no annual cycle, this fixed calendar-JJA window is only a consistent subsample of the stationary integration; it is not a physically distinct simulated summer season. These values and figures are deterministic outputs of the current code and parameter set, not observational validation.
+Because the forcing has no annual cycle, the analysis uses every post-spin-up timestep rather than a nominal JJA window. These values and figures are deterministic outputs of one fixed-seed realization of the current model and parameter set, not observational validation.
 
-### Calendar-JJA land-temperature distribution
+### Post-spin-up land-temperature distribution
 
-![Calendar-JJA land-temperature probability density](figures/land_ocean_jja_temperature_distribution.png)
+![Post-spin-up land-temperature probability density](figures/land_ocean_postspinup_temperature_distribution.png)
 
-### Calendar-JJA soil moisture--temperature relationship
+### Post-spin-up soil moisture--temperature relationship
 
-![Calendar-JJA soil moisture and land-temperature relationship](figures/land_ocean_jja_soil_moisture_temperature.png)
+![Post-spin-up soil moisture and land-temperature relationship](figures/land_ocean_postspinup_soil_moisture_temperature.png)
 
 ### Last five simulated years
 
@@ -243,8 +243,8 @@ Because the forcing is stationary and has no annual cycle, this fixed calendar-J
 - `cpc_northern_hemisphere_summer_skewness.py`: CPC download, anomaly, skewness, and polar-map workflow.
 - `figures/cpc_northern_hemisphere_jja_tmax_anomaly_skewness_1985_2014.png`: observed Northern Hemisphere JJA anomaly-skewness map.
 - `figures/land_ocean_box_model_schematic.png`: model schematic.
-- `figures/land_ocean_jja_temperature_distribution.png`: fixed calendar-JJA land-temperature distribution.
-- `figures/land_ocean_jja_soil_moisture_temperature.png`: fixed calendar-JJA soil moisture--temperature relationship.
+- `figures/land_ocean_postspinup_temperature_distribution.png`: full post-spin-up land-temperature distribution.
+- `figures/land_ocean_postspinup_soil_moisture_temperature.png`: full post-spin-up soil moisture--temperature relationship.
 - `figures/land_ocean_last_five_year_temperature_timeseries.png`: final five-year temperature evolution.
 
 Run the numerical experiment and regenerate its three figures with:
